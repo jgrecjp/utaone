@@ -1,0 +1,76 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    env_file: .env.production
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.production
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/database.sqlite
+      UTAONE_API_URL: http://api:8000
+    volumes:
+      - laravel_data:/data
+      - laravel_storage:/var/www/html/storage
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      UTAONE_ROOT: /app
+      UTAONE_DATABASE_PATH: /data/utaone.sqlite3
+      UTAONE_STORAGE_PATH: /data/media
+    command:
+      - uvicorn
+      - utaone_api.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --proxy-headers
+      - --forwarded-allow-ips=*
+    volumes:
+      - utaone_data:/data
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      UTAONE_ROOT: /app
+      UTAONE_DATABASE_PATH: /data/utaone.sqlite3
+      UTAONE_STORAGE_PATH: /data/media
+    depends_on:
+      - api
+    volumes:
+      - utaone_data:/data
+
+volumes:
+  utaone_data:
+  laravel_data:
+  laravel_storage:
+  caddy_data:
+  caddy_config:

@@ -8,11 +8,13 @@ UtaOneは、iOS／Android向けのカラオケアプリです。
 
 次の順番で進めてください。
 
-1. [初心者向けセットアップ](docs/getting-started.md)
+1. Windowsは[初心者向けセットアップ](docs/getting-started.md)、WSLは[WSL（Ubuntu）セットアップ](docs/wsl-ubuntu.md)
 2. [楽曲登録と管理画面の使い方](docs/admin-guide.md)
 3. [RevenueCat設定](docs/revenuecat.md)
 4. [GitHub Actions設定](docs/github-actions.md)
 5. 問題が起きたら[トラブルシューティング](docs/troubleshooting.md)
+
+本番サーバーへの設置は[本番Ubuntuへの設置](docs/production-ubuntu.md)を参照してください。
 
 ## リポジトリ構成
 

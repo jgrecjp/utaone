@@ -2,6 +2,8 @@
 
 このページでは、Windowsを主な例としてUtaOneを自分のPCで動かします。コマンドは特に記載がなければ、リポジトリ直下のPowerShellで実行します。
 
+WSL 2のUbuntuを使う場合は、専用の[WSL（Ubuntu）セットアップ](wsl-ubuntu.md)を参照してください。本番サーバーは[本番Ubuntuへの設置](production-ubuntu.md)を参照してください。
+
 ## 1. 先に知っておくこと
 
 UtaOneは次の3つを同時に動かします。

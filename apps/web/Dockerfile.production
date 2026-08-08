@@ -1,0 +1,35 @@
+FROM composer:2 AS vendor
+
+WORKDIR /app
+COPY apps/web/composer.json apps/web/composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --no-scripts \
+    --optimize-autoloader \
+    --prefer-dist
+
+FROM php:8.3-apache
+
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libonig-dev libsqlite3-dev \
+    && docker-php-ext-install mbstring pdo_sqlite \
+    && a2enmod rewrite headers expires \
+    && sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /var/www/html
+COPY apps/web/ ./
+COPY --from=vendor /app/vendor ./vendor
+COPY infra/web/entrypoint.sh /usr/local/bin/utaone-web-entrypoint
+
+RUN chmod +x /usr/local/bin/utaone-web-entrypoint \
+    && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+ENTRYPOINT ["utaone-web-entrypoint"]
+CMD ["apache2-foreground"]
