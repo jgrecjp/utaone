@@ -113,12 +113,19 @@ sudo apache2ctl configtest
 sudo systemctl reload apache2
 ```
 
-DNSのAレコードを設定してからHTTPSを有効にします。
+DNSのAレコードを設定してからHTTPSを有効にします。WebとAPIはVirtualHostを混同しないよう、証明書を分けて発行します。
 
 ```bash
-sudo certbot --apache -d uta.one -d api.uta.one
+sudo certbot --apache -d uta.one
+sudo certbot certonly --apache --cert-name api.uta.one -d api.uta.one
+sudo cp infra/apache/utaone-api-ssl.conf /etc/apache2/sites-available/
+sudo a2ensite utaone-api-ssl
+sudo apache2ctl configtest
+sudo systemctl reload apache2
 curl https://api.uta.one/health
 ```
+
+`api.uta.one`でApacheのエラーページが表示される場合、443番のAPI VirtualHostが選択されていません。`sudo apache2ctl -S`で`api.uta.one:443`が`utaone-api-ssl.conf`へ割り当てられていることを確認します。
 
 ## 7. 更新する
 
