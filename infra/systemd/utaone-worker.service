@@ -1,6 +1,6 @@
 [Unit]
 Description=UtaOne audio analysis worker
-After=network-online.target utaone-api.service
+After=network-online.target apache2.service
 Wants=network-online.target
 
 [Service]
@@ -8,8 +8,8 @@ Type=simple
 User=utaone
 Group=utaone
 WorkingDirectory=/var/www/utaone
-EnvironmentFile=/etc/utaone/api.env
-Environment=PYTHONPATH=/var/www/utaone/services/api:/var/www/utaone/services/worker
+EnvironmentFile=/etc/utaone/worker.env
+Environment=PYTHONPATH=/var/www/utaone/services/worker
 ExecStart=/var/www/utaone/.venv/bin/python -m utaone_worker --poll-seconds 3
 Restart=on-failure
 RestartSec=10

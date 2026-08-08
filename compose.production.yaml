@@ -26,7 +26,7 @@ services:
       APP_DEBUG: "false"
       DB_CONNECTION: sqlite
       DB_DATABASE: /data/database.sqlite
-      UTAONE_API_URL: http://api:8000
+      UTAONE_API_URL: http://api
     volumes:
       - laravel_data:/data
       - laravel_storage:/var/www/html/storage
@@ -34,22 +34,17 @@ services:
   api:
     build:
       context: .
-      dockerfile: services/api/Dockerfile
+      dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     env_file: .env.production
     environment:
-      UTAONE_ROOT: /app
-      UTAONE_DATABASE_PATH: /data/utaone.sqlite3
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/utaone.sqlite3
       UTAONE_STORAGE_PATH: /data/media
-    command:
-      - uvicorn
-      - utaone_api.main:app
-      - --host
-      - 0.0.0.0
-      - --port
-      - "8000"
-      - --proxy-headers
-      - --forwarded-allow-ips=*
+      CACHE_STORE: file
+      SESSION_DRIVER: file
     volumes:
       - utaone_data:/data
 

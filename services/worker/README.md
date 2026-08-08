@@ -4,7 +4,7 @@ SQLiteから解析ジョブを取得し、FFmpeg／ffprobeで音源を検査・�
 
 ```bash
 pip install -r services/worker/requirements.txt
-set PYTHONPATH=services/api;services/worker
+set PYTHONPATH=services/worker
 python -m utaone_worker --once
 ```
 

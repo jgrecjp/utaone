@@ -1,6 +1,6 @@
 [tool.pytest.ini_options]
-pythonpath = ["services/api", "services/worker"]
-testpaths = ["services/api/tests", "services/worker/tests"]
+pythonpath = ["services/worker"]
+testpaths = ["services/worker/tests"]
 
 [tool.ruff]
 line-length = 120

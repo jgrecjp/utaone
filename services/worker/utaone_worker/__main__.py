@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import time
 
-from utaone_api.config import Settings
+from .settings import Settings
 
 from .runner import run_once
 

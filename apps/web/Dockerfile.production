@@ -14,6 +14,8 @@ FROM php:8.3-apache
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
+COPY infra/php/utaone.ini /usr/local/etc/php/conf.d/utaone.ini
+
 COPY infra/web/apache-utaone.conf /etc/apache2/conf-available/utaone.conf
 
 RUN apt-get update \

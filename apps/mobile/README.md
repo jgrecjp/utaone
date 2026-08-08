@@ -3,7 +3,7 @@
 iOS／Android向けFlutterアプリです。
 
 ```bash
-flutter create --platforms=ios,android .
+python tool/generate_platforms.py --platforms=ios,android
 flutter pub get
 flutter run \
   --dart-define=UTAONE_API_URL=https://api.example.com \

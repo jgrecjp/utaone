@@ -21,7 +21,6 @@ docker compose up --build
 ```
 
 - API：`http://localhost:8000`
-- OpenAPI：`http://localhost:8000/docs`
 - SQLiteと音源：Docker volume `utaone_data`
 
 ログ：
@@ -34,12 +33,23 @@ docker compose logs -f worker
 Pythonテスト：
 
 ```powershell
-$env:PYTHONPATH='services/api;services/worker'
-python -m unittest discover -s services/api/tests -v
+$env:PYTHONPATH='services/worker'
 python -m unittest discover -s services/worker/tests -v
 ```
 
-## Laravel
+## Laravel APIを個別起動
+
+```powershell
+Set-Location apps\api
+Copy-Item .env.example .env
+composer install
+New-Item database\database.sqlite -ItemType File -Force
+php artisan key:generate
+php artisan migrate
+php artisan serve --port=8000
+```
+
+## Laravel Webを個別起動
 
 ```powershell
 Set-Location apps\web
@@ -64,8 +74,7 @@ composer audit --locked
 
 ```powershell
 Set-Location apps\mobile
-flutter create --platforms=android,ios --org jp.utaone --project-name utaone .
-python tool\prepare_platforms.py
+python tool\generate_platforms.py --platforms=android,ios
 flutter pub get
 dart format lib test
 flutter analyze
@@ -84,7 +93,8 @@ flutter run `
 
 | 変数 | 使用場所 | 秘密 | 説明 |
 |---|---|---:|---|
-| `UTAONE_DATABASE_PATH` | API／Worker | いいえ | API用SQLite |
+| `DB_DATABASE` | API | いいえ | Laravel API用SQLite |
+| `UTAONE_DATABASE_PATH` | Worker | いいえ | Workerが共有するAPI用SQLite |
 | `UTAONE_STORAGE_PATH` | API／Worker | いいえ | 音源保存先 |
 | `UTAONE_ADMIN_API_TOKEN` | API／Laravel | はい | 管理API認証 |
 | `GEMINI_API_KEY` | Worker | はい | Gemini APIキー |

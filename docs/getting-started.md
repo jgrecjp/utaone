@@ -92,7 +92,7 @@ docker compose up --build
 
 初回はPythonライブラリとFFmpegをダウンロードするため時間がかかります。次の表示を確認します。
 
-- API：`Uvicorn running on http://0.0.0.0:8000`
+- API：Laravel APIコンテナが起動し、`http://localhost:8000/health`が応答する
 - Worker：エラーを出さず待機している
 
 ブラウザーで次を開きます。
@@ -160,14 +160,13 @@ App\Models\User::where('email', 'admin@example.com')->update(['is_admin' => true
 
 ```powershell
 Set-Location <utaoneの保存場所>\apps\mobile
-flutter create --platforms=android,ios --org jp.utaone --project-name utaone .
-python tool\prepare_platforms.py
+python tool\generate_platforms.py --platforms=android,ios
 flutter pub get
 flutter test
 flutter analyze
 ```
 
-`flutter create`は不足しているAndroid／iOSプロジェクトファイルを生成します。既存の`lib`以下がアプリ本体です。
+生成スクリプトは不足しているAndroid／iOSプロジェクトファイルを作り、既存の`lib`以下のアプリ本体を上書きしません。
 
 ## 9. Androidエミュレーターで起動
 

@@ -22,9 +22,9 @@ UtaOneは、iOS／Android向けのカラオケアプリです。
 apps/
   mobile/       Flutter製iOS／Androidアプリ
   web/          Laravel 12製LP・管理画面
+  api/          Laravel 12製REST API・SQLite
 services/
-  api/          FastAPI製REST API・SQLite
-  worker/       FFmpeg・Gemini・採点ワーカー
+  worker/       Python製FFmpeg・Gemini・採点ワーカー
 docs/           設置・運用・設計資料
 ```
 
@@ -32,7 +32,7 @@ docs/           設置・運用・設計資料
 
 - アプリ：Flutter
 - Web・管理画面：PHP 8.2以降、Laravel 12
-- API：Python 3.13、FastAPI
+- API：PHP 8.2以降、Laravel 12
 - DB：SQLite（初期構成）
 - 音声処理：FFmpeg、ffprobe、librosa、NumPy
 - LLM：Gemini 3.6 Flashのみ

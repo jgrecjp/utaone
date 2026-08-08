@@ -9,7 +9,7 @@
 Pull Requestと`main`へのpushで次を確認します。
 
 - Pythonの構文と単体テスト
-- Laravel依存、ルート、SQLiteマイグレーション、テスト
+- Laravel Web／APIの依存、ルート、SQLiteマイグレーション、テスト
 - Flutterフォーマット、解析、テスト
 - API／WorkerのDockerイメージビルド
 

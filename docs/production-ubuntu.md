@@ -1,6 +1,6 @@
 # 本番Ubuntuへの設置
 
-この手順はUbuntu 24.04 LTSのVPSまたは専用サーバーを想定します。本番構成はCaddyだけを外部公開し、Laravel、FastAPI、ワーカー、SQLiteをDockerネットワーク内で動かします。CaddyがTLS証明書を自動取得します。
+この手順はUbuntu 24.04 LTSのVPSまたは専用サーバーを想定します。本番構成はCaddyだけを外部公開し、Laravel Web、Laravel API、Pythonワーカー、SQLiteをDockerネットワーク内で動かします。CaddyがTLS証明書を自動取得します。
 
 ## 1. 事前に用意するもの
 
@@ -114,7 +114,7 @@ exit
 
 ## 6. RevenueCatとアプリの接続
 
-- RevenueCat Webhook URL：`https://api.utaone.example.com/webhooks/revenuecat`
+- RevenueCat Webhook URL：`https://api.utaone.example.com/v1/webhooks/revenuecat`
 - Authorizationヘッダー：`.env.production`と同じ値
 - GitHub Actionsの`UTAONE_API_BASE_URL`：`https://api.utaone.example.com`
 

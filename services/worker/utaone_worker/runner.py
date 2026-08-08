@@ -4,8 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
-from utaone_api.config import Settings
-from utaone_api.database import connect, initialize_database
+from .database import connect
+from .settings import Settings
 
 from .alignment import gemini_alignment, normalize_lyrics
 from .media import create_stream_copy, normalize_for_analysis, probe
@@ -139,7 +139,6 @@ def _process_scoring_job(settings: Settings, job: dict) -> None:
 
 def run_once(settings: Settings | None = None) -> bool:
     settings = settings or Settings.from_env()
-    initialize_database(settings.database_path)
     job = claim_next_job(settings)
     if not job:
         return False

@@ -9,7 +9,7 @@ Flutter iOS／Android
   └─ RevenueCat購入・復元
               │ HTTPS REST API
               ▼
-Python FastAPI ───── RevenueCat Webhook
+Laravel 12 API ───── RevenueCat Webhook
   ├─ SQLiteの所有者
   ├─ 音源・録音ファイル保存
   ├─ 公開音源配信
@@ -23,12 +23,12 @@ Python Worker
   └─ librosa音程採点
 
 Laravel 12 LP／管理画面
-  └─ 管理APIトークンでFastAPIを操作
+  └─ 管理APIトークンでLaravel APIを操作
 ```
 
 ## 責務
 
-### FastAPI
+### Laravel API
 
 SQLiteへの主な書き込みを担当します。LaravelとFlutterはSQLiteファイルを直接操作せず、APIを通します。ワーカーはジョブ取得と解析結果保存の短いトランザクションだけを行います。
 
@@ -38,7 +38,7 @@ SQLiteへの主な書き込みを担当します。LaravelとFlutterはSQLiteフ
 
 ### Laravel
 
-管理者認証、素材登録画面、歌詞時刻編集、公開操作を担当します。カラオケデータ本体はFastAPIへ送ります。
+管理者認証、素材登録画面、歌詞時刻編集、公開操作を担当します。カラオケデータ本体はLaravel APIへ送ります。
 
 ### Flutter
 
@@ -46,8 +46,8 @@ SQLiteへの主な書き込みを担当します。LaravelとFlutterはSQLiteフ
 
 ## データ保存
 
-- API DB：Docker volume内の`/data/utaone.sqlite3`
-- 音源：Docker volume内の`/data/media`
+- API DB：本番では`/var/lib/utaone/utaone.sqlite3`、Dockerでは`/data/utaone.sqlite3`
+- 音源：本番では`/var/lib/utaone/media`、Dockerでは`/data/media`
 - Laravel DB：`apps/web/database/database.sqlite`
 
 2つのSQLiteは用途が異なります。API DBは楽曲・解析・録音・購読状態、Laravel DBは管理者ログインを保存します。
