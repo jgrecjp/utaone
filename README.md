@@ -14,7 +14,7 @@ UtaOneは、iOS／Android向けのカラオケアプリです。
 4. [GitHub Actions設定](docs/github-actions.md)
 5. 問題が起きたら[トラブルシューティング](docs/troubleshooting.md)
 
-本番サーバーへの設置は[本番Ubuntuへの設置](docs/production-ubuntu.md)を参照してください。
+非力な本番サーバーでは[本番Ubuntuへの設置（Dockerなし）](docs/production-ubuntu-native.md)を推奨します。Dockerを使う場合は[本番Ubuntuへの設置（Docker）](docs/production-ubuntu.md)を参照してください。
 
 ## リポジトリ構成
 

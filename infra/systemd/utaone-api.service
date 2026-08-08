@@ -1,0 +1,24 @@
+[Unit]
+Description=UtaOne FastAPI service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=utaone
+Group=utaone
+WorkingDirectory=/var/www/utaone
+EnvironmentFile=/etc/utaone/api.env
+Environment=PYTHONPATH=/var/www/utaone/services/api
+ExecStart=/var/www/utaone/.venv/bin/uvicorn utaone_api.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/lib/utaone
+
+[Install]
+WantedBy=multi-user.target

@@ -5,7 +5,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>曲一覧</span>
             @if (Auth::user()->is_admin)
-                <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSongModal">曲を追加</a>
+                <a href="{{ route('admin.karaoke.index') }}" class="btn btn-sm btn-primary">曲を追加</a>
             @endif
         </div>
         <div class="card-body">
@@ -42,5 +42,4 @@
             </div>
         </div>
     </div>
-
-
+@endsection

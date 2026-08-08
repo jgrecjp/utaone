@@ -4,7 +4,8 @@
 
 - [初心者向けセットアップ](getting-started.md)：必要ソフトの準備からローカル起動まで
 - [WSL（Ubuntu）セットアップ](wsl-ubuntu.md)：Windows上のWSL 2を使うローカル環境
-- [本番Ubuntuへの設置](production-ubuntu.md)：Docker、HTTPS、更新、バックアップ
+- [本番Ubuntuへの設置（Dockerなし）](production-ubuntu-native.md)：軽量なApache・systemd構成（推奨）
+- [本番Ubuntuへの設置（Docker）](production-ubuntu.md)：Docker、HTTPS、更新、バックアップ
 - [管理画面ガイド](admin-guide.md)：管理者作成、素材登録、解析、歌詞確認、公開
 - [RevenueCat設定](revenuecat.md)：iOS／Android商品、Entitlement、Webhook
 - [GitHub Actions設定](github-actions.md)：CI、Android・iOSビルド、Artifact取得
