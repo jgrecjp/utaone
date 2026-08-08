@@ -7,10 +7,13 @@ import '../models/song.dart';
 class ApiClient {
   ApiClient({http.Client? client}) : _client = client ?? http.Client();
 
-  static const _baseUrl = String.fromEnvironment(
+  static const _configuredBaseUrl = String.fromEnvironment(
     'UTAONE_API_URL',
-    defaultValue: 'http://127.0.0.1:8000',
+    defaultValue: '',
   );
+  static String get _baseUrl => _configuredBaseUrl.trim().isEmpty
+      ? 'https://api.uta.one'
+      : _configuredBaseUrl.replaceAll(RegExp(r'/+$'), '');
   final http.Client _client;
 
   Future<List<Song>> songs() async {
