@@ -14,12 +14,14 @@ FROM php:8.3-apache
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
+COPY infra/web/apache-utaone.conf /etc/apache2/conf-available/utaone.conf
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libonig-dev libsqlite3-dev \
     && docker-php-ext-install mbstring pdo_sqlite \
     && a2enmod rewrite headers expires \
+    && a2enconf utaone \
     && sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
-    && sed -ri 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html

@@ -78,6 +78,14 @@ docker compose --env-file .env.production -f compose.production.yaml up -d --bui
 docker compose --env-file .env.production -f compose.production.yaml ps
 ```
 
+Laravelの画面が更新されない場合や、トップページ以外が404になる場合は、Webイメージをキャッシュなしで再構築します。
+
+```bash
+docker compose --env-file .env.production -f compose.production.yaml build --no-cache web
+docker compose --env-file .env.production -f compose.production.yaml up -d web
+docker compose --env-file .env.production -f compose.production.yaml exec web php artisan optimize:clear
+```
+
 起動ログを確認します。
 
 ```bash
