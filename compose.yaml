@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    env_file: .env
+    environment:
+      UTAONE_ROOT: /app
+      UTAONE_DATABASE_PATH: /data/utaone.sqlite3
+      UTAONE_STORAGE_PATH: /data/media
+    ports:
+      - "8000:8000"
+    volumes:
+      - utaone_data:/data
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    env_file: .env
+    environment:
+      UTAONE_ROOT: /app
+      UTAONE_DATABASE_PATH: /data/utaone.sqlite3
+      UTAONE_STORAGE_PATH: /data/media
+    depends_on:
+      - api
+    volumes:
+      - utaone_data:/data
+
+volumes:
+  utaone_data:

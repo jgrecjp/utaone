@@ -1,0 +1,25 @@
+name: utaone
+description: UtaOne karaoke for iOS and Android
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.5.0
+  just_audio: ^0.10.6
+  path_provider: ^2.1.5
+  purchases_flutter: ^10.5.0
+  record: ^7.1.1
+  shared_preferences: ^2.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

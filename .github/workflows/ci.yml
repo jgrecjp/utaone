@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python API and worker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: |
+            services/api/requirements.txt
+            services/worker/requirements.txt
+      - name: Install dependencies
+        run: pip install -r services/api/requirements.txt -r services/worker/requirements.txt
+      - name: Compile Python
+        run: python -m compileall -q services/api services/worker
+      - name: Run unit tests
+        env:
+          PYTHONPATH: services/api:services/worker
+        run: |
+          python -m unittest discover -s services/api/tests -v
+          python -m unittest discover -s services/worker/tests -v
+
+  laravel:
+    name: Laravel web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, sqlite3, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Configure test environment
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate
+      - name: Validate configuration and migrations
+        run: |
+          php artisan config:clear
+          php artisan route:list
+          php artisan migrate --force
+      - name: Run tests
+        run: php artisan test
+
+  flutter:
+    name: Flutter analyze and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform projects
+        run: |
+          flutter create --platforms=android,ios --org jp.utaone --project-name utaone .
+          rm -f test/widget_test.dart
+          python3 tool/prepare_platforms.py
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Analyze
+        run: flutter analyze
+      - name: Run tests
+        run: flutter test
+
+  containers:
+    name: Container build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build API image
+        run: docker build -f services/api/Dockerfile -t utaone-api:ci .
+      - name: Build worker image
+        run: docker build -f services/worker/Dockerfile -t utaone-worker:ci .

@@ -1,0 +1,88 @@
+name: Mobile builds
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-build.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UTAONE_API_URL: ${{ vars.UTAONE_API_URL }}
+  REVENUECAT_IOS_API_KEY: ${{ secrets.REVENUECAT_IOS_API_KEY }}
+  REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+
+jobs:
+  android:
+    name: Android AAB and APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android project
+        run: |
+          flutter create --platforms=android --org jp.utaone --project-name utaone .
+          rm -f test/widget_test.dart
+          python3 tool/prepare_platforms.py
+      - run: flutter pub get
+      - name: Build release artifacts
+        run: |
+          flutter build appbundle --release \
+            --dart-define=UTAONE_API_URL="$UTAONE_API_URL" \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+          flutter build apk --release \
+            --dart-define=UTAONE_API_URL="$UTAONE_API_URL" \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: utaone-android-${{ github.sha }}
+          path: |
+            apps/mobile/build/app/outputs/bundle/release/app-release.aab
+            apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: iOS unsigned app
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate iOS project
+        run: |
+          flutter create --platforms=ios --org jp.utaone --project-name utaone .
+          rm -f test/widget_test.dart
+          python3 tool/prepare_platforms.py
+      - run: flutter pub get
+      - name: Build without code signing
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=UTAONE_API_URL="$UTAONE_API_URL" \
+            --dart-define=REVENUECAT_IOS_API_KEY="$REVENUECAT_IOS_API_KEY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: utaone-ios-unsigned-${{ github.sha }}
+          path: apps/mobile/build/ios/iphoneos/Runner.app
+          if-no-files-found: error
+          retention-days: 14
