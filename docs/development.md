@@ -1,64 +1,103 @@
-# 開発環境
+# 開発環境リファレンス
 
-## APIとワーカー
+初めて設置する場合は、先に[初心者向けセットアップ](getting-started.md)を参照してください。
 
-1. `.env.example`を`.env`へコピーし、管理APIトークンを変更する。
-2. `docker compose up --build`を実行する。
-3. `http://localhost:8000/docs`でAPI仕様を確認する。
+## 対応バージョン
 
-DockerイメージにはFFmpegとffprobeが含まれる。SQLiteと音源は`utaone_data`ボリュームでAPI／ワーカー間共有するが、DBへの通常書き込みはAPIへ集約する。ワーカーは短いトランザクションでジョブ取得・結果反映だけを行う。
+- Python 3.13
+- PHP 8.2以降
+- Laravel 12.61.1以降（lockは12.65.0）
+- Composer 2
+- Flutter stable／Dart 3.4以降
+- Docker DesktopまたはDocker Engine＋Compose v2
+- FFmpeg／ffprobe（Dockerイメージ内に同梱）
+- Gemini model：`gemini-3.6-flash`
 
-歌詞タイミング解析に使用するLLMはGeminiのみで、既定モデルは`gemini-3.6-flash`。`GEMINI_AUDIO_MODEL`で明示的に変更できる。
+## API・ワーカー
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+- API：`http://localhost:8000`
+- OpenAPI：`http://localhost:8000/docs`
+- SQLiteと音源：Docker volume `utaone_data`
+
+ログ：
+
+```powershell
+docker compose logs -f api
+docker compose logs -f worker
+```
+
+Pythonテスト：
+
+```powershell
+$env:PYTHONPATH='services/api;services/worker'
+python -m unittest discover -s services/api/tests -v
+python -m unittest discover -s services/worker/tests -v
+```
 
 ## Laravel
 
-```bash
-cd apps/web
+```powershell
+Set-Location apps\web
+Copy-Item .env.example .env
 composer install
-copy .env.example .env
+New-Item database\database.sqlite -ItemType File -Force
 php artisan key:generate
+php artisan migrate
 php artisan serve --port=8080
 ```
 
-Laravelの`.env`には`UTAONE_API_URL=http://127.0.0.1:8000`と、APIと同じ`UTAONE_ADMIN_API_TOKEN`を設定する。管理画面は`/admin/karaoke`。
-初期管理者はユーザー作成後に`php artisan tinker`から対象ユーザーの`is_admin`を`true`へ変更する。
+テストと検査：
+
+```powershell
+php artisan route:list
+php artisan test
+composer validate --no-check-publish
+composer audit --locked
+```
 
 ## Flutter
 
-Flutter SDK導入後、`apps/mobile`でプラットフォームファイルを生成して依存を取得する。
-
-```bash
-flutter create --platforms=ios,android .
+```powershell
+Set-Location apps\mobile
+flutter create --platforms=android,ios --org jp.utaone --project-name utaone .
+python tool\prepare_platforms.py
 flutter pub get
-flutter run --dart-define=UTAONE_API_URL=http://10.0.2.2:8000 \
+dart format lib test
+flutter analyze
+flutter test
+```
+
+Androidエミュレーター：
+
+```powershell
+flutter run `
+  --dart-define=UTAONE_API_URL=http://10.0.2.2:8000 `
   --dart-define=REVENUECAT_ANDROID_API_KEY=goog_xxx
 ```
 
-iOSではHTTPSのAPI URLと`REVENUECAT_IOS_API_KEY=appl_xxx`を使用する。iOSへマイク利用目的文言とIn-App Purchase capability、Androidへ`RECORD_AUDIO`、`INTERNET`、`com.android.vending.BILLING`権限を設定する。
+## 主要環境変数
 
-## RevenueCat
+| 変数 | 使用場所 | 秘密 | 説明 |
+|---|---|---:|---|
+| `UTAONE_DATABASE_PATH` | API／Worker | いいえ | API用SQLite |
+| `UTAONE_STORAGE_PATH` | API／Worker | いいえ | 音源保存先 |
+| `UTAONE_ADMIN_API_TOKEN` | API／Laravel | はい | 管理API認証 |
+| `GEMINI_API_KEY` | Worker | はい | Gemini APIキー |
+| `GEMINI_AUDIO_MODEL` | Worker | いいえ | 既定`gemini-3.6-flash` |
+| `REVENUECAT_WEBHOOK_AUTHORIZATION` | API | はい | Webhook認証値 |
+| `REVENUECAT_WEBHOOK_SIGNING_SECRET` | API | はい | HMAC署名検証 |
+| `UTAONE_REQUIRE_SUBSCRIPTION` | API | いいえ | 本番では`true` |
+| `UTAONE_API_URL` | Laravel／Flutter | いいえ | APIのURL |
 
-- Entitlement ID: `premium`
-- Flutterには公開SDKキーのみ設定する。
-- Webhook URL: `POST /v1/webhooks/revenuecat`
-- RevenueCat管理画面のAuthorization headerを`REVENUECAT_WEBHOOK_AUTHORIZATION`と一致させる。
-- HMAC署名を有効にし、署名シークレットを`REVENUECAT_WEBHOOK_SIGNING_SECRET`へ設定する。
-- 本番環境では`UTAONE_REQUIRE_SUBSCRIPTION=true`とし、サーバー側でも録音・採点APIを購読者に限定する。
+## 現在の制約
 
-## GitHub Actions
-
-`CI` workflowはPRと`main`へのpushでPythonテスト、Laravelテスト・マイグレーション、Flutter解析・テスト、API／ワーカーのDockerビルドを実行する。
-
-`Mobile builds` workflowは`main`のモバイル変更、`v*`タグ、手動実行で次を生成し、14日間Artifactとして保存する。
-
-- Android App Bundle（AAB）
-- Android APK
-- iOS署名なし`Runner.app`
-
-GitHubリポジトリに次を設定する。
-
-- Repository variable `UTAONE_API_URL`: 公開HTTPS API URL
-- Actions secret `REVENUECAT_IOS_API_KEY`: iOS公開SDKキー
-- Actions secret `REVENUECAT_ANDROID_API_KEY`: Android公開SDKキー
-
-iOSのArtifactは動作確認用の署名なしビルドであり、App Storeへ提出するIPAではない。配布署名用の証明書とProvisioning Profileはリポジトリへ保存せず、GitHub Secretsまたは専用署名サービスで扱う。
+- SQLiteのためWorkerは低並列運用を前提とします。
+- 管理画面のタイムラインは数値入力で、波形UIは未実装です。
+- Geminiの同期単位は歌詞行です。
+- 採点はアカペラと録音の基本周波数比較による初期版です。
+- iOSのGitHub Artifactは署名なしです。
